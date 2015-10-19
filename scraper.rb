@@ -1,25 +1,33 @@
-# This is a template for a Ruby scraper on morph.io (https://morph.io)
-# including some code snippets below that you should find helpful
+require 'scraperwiki'
+require 'nokogiri'
 
-# require 'scraperwiki'
-# require 'mechanize'
-#
-# agent = Mechanize.new
-#
-# # Read in a page
-# page = agent.get("http://foo.com")
-#
-# # Find somehing on the page using css selectors
-# p page.at('div.content')
-#
-# # Write out to the sqlite database using scraperwiki library
-# ScraperWiki.save_sqlite(["name"], {"name" => "susan", "occupation" => "software developer"})
-#
-# # An arbitrary query against the database
-# ScraperWiki.select("* from data where 'name'='peter'")
+# Read in a page
+url = "https://docs.google.com/spreadsheets/d/1QkkIRF-3Qrz-aRIxERbGbB7YHWz2-t4ix-7TEcuBNfE/pubhtml?gid=1903959032&single=true"
+page = Nokogiri::HTML(open(url), nil, 'utf-8')
+rows = page.xpath('//table[@class="waffle"]/tbody/tr')
 
-# You don't have to do things with the Mechanize or ScraperWiki libraries.
-# You can use whatever gems you want: https://morph.io/documentation/ruby
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
+# Find something on the page using css selectors
+content = []
+rows.collect do |r|
+  content << r.xpath('td').map { |td| td.text.strip }
+end
+
+# Builds records
+content.shift
+content.each do |row|
+
+  record = {
+    "id" => row[0],
+    "macro_area" => row[1],
+    "total" => row[2],
+    "last_update" => Date.today.to_s
+  }
+
+  # Save if the record doesn't exist
+  if ((ScraperWiki.select("* from data where `source`='#{record['id']}'").empty?) rescue true)
+    ScraperWiki.save_sqlite(["id"], record)
+    puts "Adds new record " + record['id']
+  else
+    puts "Skipping already saved record " + record['id']
+  end
+end
