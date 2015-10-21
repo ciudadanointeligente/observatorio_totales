@@ -19,7 +19,8 @@ content.each do |row|
   record = {
     "id" => row[0],
     "macro_area" => row[1],
-    "total" => row[2],
+    "mensaje" => row[2],
+    "total" => row[3],
     "last_update" => Date.today.to_s
   }
 
