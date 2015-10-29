@@ -24,11 +24,12 @@ content.each do |row|
     "last_update" => Date.today.to_s
   }
 
-  # Save if the record doesn't exist
+  # Storage records
   if ((ScraperWiki.select("* from data where `source`='#{record['id']}'").empty?) rescue true)
     ScraperWiki.save_sqlite(["id"], record)
     puts "Adds new record " + record['id']
   else
-    puts "Skipping already saved record " + record['id']
+    ScraperWiki.save_sqlite(["id"], record)
+    puts "Updating already saved record " + record['id']
   end
 end
