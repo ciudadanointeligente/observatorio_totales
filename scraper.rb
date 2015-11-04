@@ -21,6 +21,7 @@ content.each do |row|
     "macro_area" => row[1],
     "mensaje" => row[3],
     "total" => row[4],
+    "nota_promedio" => row[5],
     "last_update" => Date.today.to_s
   }
 
